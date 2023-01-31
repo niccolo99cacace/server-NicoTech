@@ -10,6 +10,7 @@ const {
   removeItemById,
   updateItemsCounter,
 } = require("../controllers/cart");
+const {authMiddleware} = require("../middlewares/is-auth");
 const {
   validate,
   signInValidator,
@@ -25,7 +26,7 @@ router.post("/createUser",
 ); 
 
 router.post("/sign-in",
-  signInValidator, validate, signIn); 
+signInValidator, validate,authMiddleware, signIn); 
 
 router.get("/logout",logout);
 

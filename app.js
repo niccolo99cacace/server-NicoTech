@@ -15,6 +15,9 @@ app.use(express.json());
 app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 app.use(errorHandler);
+const cookieParser = require('cookie-parser');
+
+app.use(cookieParser());
 
 
 const cors = require('cors');
