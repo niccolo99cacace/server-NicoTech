@@ -41,7 +41,7 @@ app.use(
     cookie: {
       //se a true vuol dire che il cookie viene inviato solo se la connessione è sicura (solo con HTTPS)
       secure: false,
-      maxAge: 60 * 60 * 1000 // scadenza del cookie in 1 ora (in ms)
+      maxAge: 1000 * 60 * 60 * 24 * 7, // 1 settimana
     },
 //store per sapere dove è salvata la sessione(sopra abbiamo la var store)
     store: store,

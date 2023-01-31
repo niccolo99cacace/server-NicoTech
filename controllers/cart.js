@@ -1,11 +1,14 @@
 const User = require("../models/user");
 
 exports.addItemToCart = async (req, res) => {
-  // Crea un oggetto cartItem con i dati passati come parametri
-  const { userId, itemId, itemQuantity } = req.body;
+
+  try {
+      // Crea un oggetto cartItem con i dati passati come parametri
+  
   // Utilizza findOneAndUpdate() per trovare l'utente specifico e aggiungere l'elemento al carrello
   
-  try {
+
+    const { userId, itemId, itemQuantity } = req.body;
     const user = await User.findOne({ _id: userId });
     if (!user) {
     // gestisci l'errore se l'utente non esiste
@@ -36,4 +39,62 @@ exports.addItemToCart = async (req, res) => {
         console.error(error);
         res.status(500).send({ message: "Errore nel server" });
         }
+};
+
+
+//ritorna il carrello in base allo specifico utente 
+exports.getCartByUserId = async (req, res) => {
+  try {
+
+    const { userId } = req.body;
+    
+    const user = await User.findOne({ _id: userId }, "cart");
+    res.json(user.cart);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+
+  
+exports.removeItemById = async (req, res) => {  
+  
+  try {
+  const { userId, itemId } = req.body;
+  
+const user = await User.findOne({ userId });
+if (!user) throw new Error("Utente non trovato");
+
+const updatedUser = await User.findOneAndUpdate(
+  { userId },
+  { $pull: { cart: { itemId } } },
+  { new: true }
+);
+
+res.json(updatedUser);
+} catch (error) {
+  throw new Error(error);
+}
+};
+
+
+
+
+exports.updateItemsCounter = async (req, res) => {  
+  
+  try {
+  const { userId, itemId, itemQuantity } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  const cartItemIndex = user.cart.findIndex(item => item.itemId === itemId);
+  if (cartItemIndex === -1) throw new Error('Item not found in cart');
+
+  user.cart[cartItemIndex].itemQuantity = itemQuantity;
+  await user.save();
+  res.json(user.cart);
+} catch (error) {
+  throw new Error(error);
+}
 };

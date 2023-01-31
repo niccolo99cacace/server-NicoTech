@@ -6,6 +6,9 @@ const {
 } = require("../controllers/user");
 const {
   addItemToCart,
+  getCartByUserId,
+  removeItemById,
+  updateItemsCounter,
 } = require("../controllers/cart");
 const {
   validate,
@@ -31,7 +34,11 @@ router.get("/logout",logout);
 
 router.post("/addItemToCart",addItemToCart);
 
+router.post("/getCartByUserId",getCartByUserId);
 
+router.post("/removeItemById",removeItemById);
+
+router.post("/updateItemsCounter",updateItemsCounter);
 
 
 module.exports = router;
