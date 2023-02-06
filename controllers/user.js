@@ -2,6 +2,10 @@ const User = require("../models/user");
 const { sendError } = require("../utils/helper");
 const jwt = require('jsonwebtoken');
 
+//la blacklist contenente i token non più validi , ovvero quelli delle persone che hanno fatto il logout
+const tokenBlacklist = [];
+module.exports.tokenBlacklist = tokenBlacklist;
+
 exports.createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
@@ -69,21 +73,29 @@ exports.signIn = async (req, res, next) => {
 
   res.json({token:token , user:_id});
 } catch (error) {
-  res.status(200).json({error:error});
+  res.json({error:error});
 }
 };
 
 
 
 
-
+//distruggo la sessione sul database ed aggiungo il token dell'utente che ha fatto il logout nella blacklist
   exports.logout = (req, res) => {
-    req.session.destroy((err) => {
-      if (err) throw err; 
-      res.json({ ok:"logout effettuato"});     
-    });
+    try{
+    const userAuth = JSON.parse(req.cookies.auth);
+    req.session.destroy();
+      console.log({ ok:"database session broken"});  
+      tokenBlacklist.push(userAuth.token);
+      console.log({ ok:"token added to blacklist"}); 
+      res.json({ok:"token added to blacklist"});
+    }
+    catch (error) {
+      res.json({error:error});
+    }
   };
 
+  
   
 
 

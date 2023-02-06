@@ -1,5 +1,6 @@
 const express = require("express");
 const {
+  tokenBlacklist,
   createUser,
   signIn,
   logout,
@@ -10,7 +11,7 @@ const {
   removeItemById,
   updateItemsCounter,
 } = require("../controllers/cart");
-const {authMiddleware} = require("../middlewares/is-auth");
+const authMiddleware = require("../middlewares/is-auth");
 const {
   validate,
   signInValidator,
@@ -26,7 +27,7 @@ router.post("/createUser",
 ); 
 
 router.post("/sign-in",
-signInValidator, validate,authMiddleware, signIn); 
+signInValidator, validate, authMiddleware(tokenBlacklist), signIn); 
 
 router.get("/logout",logout);
 
