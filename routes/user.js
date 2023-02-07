@@ -45,7 +45,7 @@ router.post("/removeItemById",removeItemById);
 
 router.post("/updateItemsCounter",updateItemsCounter);
 
-router.post("/getCartItemsByUser",getCartItemsByUser);
+router.get("/getCartItemsByUser",getCartItemsByUser);
 
 
 module.exports = router;

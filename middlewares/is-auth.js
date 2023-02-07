@@ -16,7 +16,7 @@ nel payload del token, se la verifica del token riesce. In caso contrario, viene
 */
 
 
-function authMiddleware (tokenBlacklist) {
+function authMiddleware(tokenBlacklist) {
   return (req, res, next) => {
 
   if(req.cookies.auth === undefined ){console.log("Nooooo token provided.");

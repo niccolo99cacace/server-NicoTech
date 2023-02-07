@@ -106,7 +106,9 @@ exports.updateItemsCounter = async (req, res) => {
 exports.getCartItemsByUser = async (req, res) => {  
   
   try {
-  const { userId } = req.body;
+  const userAuth = await JSON.parse(req.cookies.auth);
+  const userId = userAuth.userId;
+  console.log(userId);
 
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
