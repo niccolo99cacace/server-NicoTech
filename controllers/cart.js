@@ -19,7 +19,7 @@ exports.addItemToCart = async (req, res) => {
       //in questo passo controllo se nel carrello ci sono items con l'id uguale a quello che voglio aggiungere
       //nel caso ci fosse già , mi memorizzo l'indice nel carrello di quell'elemento già presente
       for (var i = 0; i < user.cart.length; i++) {
-        if (user.cart[i].itemId === itemId) {
+        if (user.cart[i].itemId == itemId) {
           itemIndex = i;
           break;
         }
@@ -79,7 +79,7 @@ res.json(updatedUser);
 
 
 
-
+//quando sto nel carrello posso decidere di modificare la quantità di item da prendere
 exports.updateItemsCounter = async (req, res) => {  
   
   try {
@@ -88,12 +88,32 @@ exports.updateItemsCounter = async (req, res) => {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
 
-  const cartItemIndex = user.cart.findIndex(item => item.itemId === itemId);
+  const cartItemIndex = await user.cart.findIndex(item => item.itemId == itemId);
   if (cartItemIndex === -1) throw new Error('Item not found in cart');
 
   user.cart[cartItemIndex].itemQuantity = itemQuantity;
   await user.save();
   res.json(user.cart);
+} catch (error) {
+  throw new Error(error);
+}
+};
+
+
+//dato l'id dell'utente, ti restituisce un array con oggetti con chiave "ItemId" contenenti un altro oggetto 
+//con tutti gli attributi dello specifico item e poi , nel primo oggetto "itemQuantity" e l'id dello specifico oggetto 
+//del carrello 
+exports.getCartItemsByUser = async (req, res) => {  
+  
+  try {
+  const { userId } = req.body;
+
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  const cartItems = await user.populate("cart.itemId");
+
+  res.json(cartItems.cart);
 } catch (error) {
   throw new Error(error);
 }

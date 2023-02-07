@@ -10,6 +10,7 @@ const {
   getCartByUserId,
   removeItemById,
   updateItemsCounter,
+  getCartItemsByUser,
 } = require("../controllers/cart");
 const authMiddleware = require("../middlewares/is-auth");
 const {
@@ -26,8 +27,10 @@ router.post("/createUser",
     createUser
 ); 
 
+
+//authMiddleware(tokenBlacklist),
 router.post("/sign-in",
-signInValidator, validate, authMiddleware(tokenBlacklist), signIn); 
+signInValidator, validate,  signIn); 
 
 router.get("/logout",logout);
 
@@ -41,6 +44,8 @@ router.post("/getCartByUserId",getCartByUserId);
 router.post("/removeItemById",removeItemById);
 
 router.post("/updateItemsCounter",updateItemsCounter);
+
+router.post("/getCartItemsByUser",getCartItemsByUser);
 
 
 module.exports = router;

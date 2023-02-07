@@ -6,8 +6,8 @@ const bcrypt = require("bcrypt");
 
 const cartItemSchema = new mongoose.Schema({
   itemId: {
-    type:String,
-    required: true,
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Item',
   },
   itemQuantity: {
   type: Number,
@@ -54,3 +54,4 @@ userSchema.methods.comparePassword = async function (password) {
 };
 
 module.exports = mongoose.model("User", userSchema);
+
