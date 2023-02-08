@@ -17,6 +17,11 @@ const itemSchema = mongoose.Schema({
     trim: true,
     required: true,
   },
+  largeDescription:{
+    type: String,
+    trim: true,
+    required: false,
+  },
   category: {
     type: String,
     trim: true,
@@ -34,7 +39,7 @@ availability:{
     required: true
   },
   imageUrl: {
-    type: String,
+    type: [String],
     trim: true,
     required: true
   },
