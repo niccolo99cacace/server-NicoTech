@@ -6,8 +6,7 @@ const {
   logout,
 } = require("../controllers/user");
 const {
-  addItemToCart,
-  getCartByUserId,
+  addItemById,
   removeItemById,
   updateItemsCounter,
   getCartItemsByUser,
@@ -37,9 +36,7 @@ router.get("/logout",logout);
 //_-------------------------------------------
 //      USER CART 
 
-router.post("/addItemToCart",addItemToCart);
-
-router.post("/getCartByUserId",getCartByUserId);
+router.post("/addItemById",addItemById);
 
 router.post("/removeItemById",removeItemById);
 
