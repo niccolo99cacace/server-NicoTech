@@ -3,25 +3,28 @@ const { sendError } = require("../utils/helper");
 
 exports.home = async (req, res, next) => {
   try {
+    
     const items = await Item.find();
-    console.log(items);
+    console.log(req.result);
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
+
 exports.createItem = async (req, res) => {
-  const { name, brand, description, category, price, availability, imageUrl } =
+  const { name, brand, description, largeDescription, category, price, availability, imageUrl } =
     req.body;
 
-  const newItem = new Item({ name, brand, description, category, price, availability, imageUrl });
+  const newItem = new Item({ name, brand, description,largeDescription, category, price, availability, imageUrl });
   await newItem.save();
 
   res.status(201).json({
     message: "Item added!",
   });
 };
+
 
 exports.getItemById = async (req, res) => {
   const {_id} =    req.body;

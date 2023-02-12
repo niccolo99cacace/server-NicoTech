@@ -1,5 +1,71 @@
 const User = require("../models/user");
 
+
+
+
+exports.addItemById = async (req, res) => {
+
+  try {
+      // Crea un oggetto cartItem con i dati passati come parametri
+  
+  // Utilizza findOneAndUpdate() per trovare l'utente specifico e aggiungere l'elemento al carrello
+  
+
+    const {  itemId, itemQuantity } = req.body;
+    //per dire al server se l'item da aggiungere sta già nel carrello
+    var double;
+
+  const userAuth = await JSON.parse(req.cookies.auth);
+  const userId = userAuth.userId;
+
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+
+      var itemIndex = -1;
+      //in questo passo controllo se nel carrello ci sono items con l'id uguale a quello che voglio aggiungere
+      //nel caso ci fosse già , mi memorizzo l'indice nel carrello di quell'elemento già presente
+      for (var i = 0; i < user.cart.length; i++) {
+        if (user.cart[i].itemId == itemId) {
+          itemIndex = i;
+          double=true;
+          break;
+        }
+      }
+      //se l'item non è già nel carrello allora lo aggiungo
+      if (itemIndex === -1) {
+        user.cart.push({ itemId: itemId, itemQuantity: itemQuantity });
+        double=false;
+      }
+      //se è già presente , aumento la quantità
+      else {
+        user.cart[itemIndex].itemQuantity += itemQuantity;
+      }
+
+      await user.save();
+      res.json({double:double});
+      console.log({double:double});
+    } catch (error) {
+        console.error(error);
+        res.status(500).send({ message: "Errore nel server" });
+        }
+};
+
+
+//ritorna il carrello in base allo specifico utente 
+exports.getCartByUserId = async (req, res) => {
+  try {
+
+    const { userId } = req.body;
+    
+    const user = await User.findOne({ _id: userId }, "cart");
+    res.json(user.cart);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+
+
 //per eliminare l'item dal carrello 
 exports.removeItemById = async (req, res) => {  
   
@@ -15,33 +81,6 @@ exports.removeItemById = async (req, res) => {
 const updatedUser = await User.findOneAndUpdate(
   { userId },
   { $pull: { cart: { itemId } } },
-  { new: true }
-);
-
-res.json(updatedUser);
-} catch (error) {
-  throw new Error(error);
-}
-};
-
-//per aggiungere l'item al carrello 
-exports.addItemById = async (req, res) => {  
-  
-  try {
-  const { itemId, itemQuantity } = req.body;
-  console.log(itemId);
-  console.log(itemQuantity);
-
-  const userAuth = await JSON.parse(req.cookies.auth);
-  const userId = userAuth.userId;
-  console.log(userId);
-  const user = await User.findById(userId);
-  if (!user) throw new Error('User not found');
-
-const updatedUser = await User.findOneAndUpdate(
-  { userId },
-  { $push: { cart: { itemId: itemId, itemQuantity: itemQuantity } } },
-  //serve a ritornare il carrello aggiornato
   { new: true }
 );
 

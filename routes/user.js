@@ -11,7 +11,6 @@ const {
   updateItemsCounter,
   getCartItemsByUser,
 } = require("../controllers/cart");
-const authMiddleware = require("../middlewares/is-auth");
 const {
   validate,
   signInValidator,

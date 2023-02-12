@@ -16,33 +16,80 @@ nel payload del token, se la verifica del token riesce. In caso contrario, viene
 */
 
 
-function authMiddleware(tokenBlacklist) {
-  return (req, res, next) => {
 
-  if(req.cookies.auth === undefined ){console.log("Nooooo token provided.");
-   res.json({ err: "Nooooo token provided." });}
+function tokenVerification(token) {
 
-      //per recuperare id dell'utente e token dal cookie 
-    const userAuth = JSON.parse(req.cookies.auth);
-  
+    try {
 
-  if (userAuth.token === undefined) {console.log("Nooooo token provided.");
-  res.json({ err: "Nooooo token provided." });}
-  
-  if (tokenBlacklist.includes(userAuth.token)) {console.log("Access denied. Token no longer valid.(present in blacklist)");
-  return res.json({ errror: "token no longer valid.(present in blacklist)" });}
+     jwt.verify(token, process.env.JTW_TOKEN_SIGNATURE, { complete: true });
 
-  try {
-    const decoded = jwt.verify(userAuth.token, process.env.JTW_TOKEN_SIGNATURE);
-    req.user = decoded;
-    console.log("correct token");
-    res.json({ ok: "correct token" })
-    next();
+     return "ok";
+
   } catch (error) {
-    console.log("errore del server durante il controllo di validità del token");
-    console.log(error);
+    
+    return "error";
   }
+
+};
+
+
+
+/*
+0 --> NO cookie  (sessionCart deve essere creato)
+1 --> ci sta il token ed è valido
+2 --> NO token valido o presente e NO carrello  (sessionCart deve essere creato)
+3 --> NO token ma carrello SI
+
+*/
+
+
+
+function controlTokenAndSessionCart(tokenBlacklist) {
+  return (req, res, next) => {
+    try {
+      var sessionCart = [];
+
+   //se non esiste il cookie di NicoTech allora creo un carrello di sessione e invio il codice 0
+    if(req.cookies.auth === undefined ){console.log("Nooooo token provided and Nooo session cart");
+    console.log("nothing");
+   // salvo il sessionCart nel local storage del browser
+    //localStorage.setItem("sessionCart", JSON.stringify(sessionCart));
+    console.log("DEVI CREARE IL SESSION CART AAAA");
+    req.result = 0;
+    next();
+  }
+  else{
+
+    const userAuth = JSON.parse(req.cookies.auth);
+
+    //token NON VALIDO OPPURE NON PRESENTE NEL COOKIE
+    if (userAuth.token === undefined ||
+       tokenBlacklist.includes(userAuth.token)==true  || 
+    tokenVerification(userAuth.token)=="error"  )
+    {
+//SE token NON VALIDO OPPURE NON PRESENTE NEL COOKIE
+
+      //se il carrello non è presente nel cookie allora lo devo creare 
+      if ( userAuth.sessionCart === undefined) {
+        //e passo cod 2 
+        req.result = 2;
+        next();}
+        //Se il carrello ci sta allora semplicemente cod 3
+        else{ req.result = 3; next(); }
+  }
+  
+  //NEL CASO IN CUI IL TOKEN C'è ED é VALIDO
+else{ req.result = 1;
+  next();}
+
+}
+} catch (error) {
+  if (error instanceof jwt.JsonWebTokenError) {
+    }
+}
 
 }};
 
-module.exports = authMiddleware;
+
+
+module.exports = controlTokenAndSessionCart;
