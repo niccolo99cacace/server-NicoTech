@@ -4,6 +4,7 @@ const {
   createUser,
   signIn,
   logout,
+  authenticatedOrNot,
 } = require("../controllers/user");
 const {
   addItemById,
@@ -16,7 +17,7 @@ const {
   signInValidator,
 } = require("../middlewares/validator");
 const router = express.Router();
-
+const controlTokenAndSessionCart= require("../middlewares/is-auth");
 
 
 // USER
@@ -31,6 +32,8 @@ router.post("/sign-in",
 signInValidator, validate,  signIn); 
 
 router.get("/logout",logout);
+
+router.get("/authenticatedOrNot",controlTokenAndSessionCart(tokenBlacklist),authenticatedOrNot)
 
 //_-------------------------------------------
 //      USER CART 

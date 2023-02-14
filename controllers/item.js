@@ -5,7 +5,7 @@ exports.home = async (req, res, next) => {
   try {
     
     const items = await Item.find();
-    console.log(req.result);
+    
     res.json(items);
   } catch (err) {
     res.status(500).json({ message: err.message });

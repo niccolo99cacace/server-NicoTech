@@ -66,7 +66,7 @@ exports.signIn = async (req, res, next) => {
     expires: new Date(Date.now() + expiresIn)
   });
 
-//queste 2 righe servono per salvare sul database ll'id dell'utente ed il token 
+//queste 2 righe servono per salvare sul database l'id dell'utente ed il token 
   req.session.token = token;
   req.session.userId = _id; 
   await req.session.save();
@@ -94,6 +94,21 @@ exports.signIn = async (req, res, next) => {
       res.json({error:error});
     }
   };
+
+
+
+  exports.authenticatedOrNot = (req, res) => {
+    try{
+      console.log(req.result);
+      
+      res.json(req.result);
+    }
+    catch (error) {
+      res.json({error:error});
+    }
+  };
+
+  
 
   
 

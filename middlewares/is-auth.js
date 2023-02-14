@@ -35,10 +35,9 @@ function tokenVerification(token) {
 
 
 /*
-0 --> NO cookie  (sessionCart deve essere creato)
-1 --> ci sta il token ed è valido
-2 --> NO token valido o presente e NO carrello  (sessionCart deve essere creato)
-3 --> NO token ma carrello SI
+0 --> SI TOKEN valido
+1 --> NO TOKEN NO SESSIONCART (creato)
+2 --> NO token SI SESSIONCART
 
 */
 
@@ -49,40 +48,43 @@ function controlTokenAndSessionCart(tokenBlacklist) {
     try {
       var sessionCart = [];
 
-   //se non esiste il cookie di NicoTech allora creo un carrello di sessione e invio il codice 0
-    if(req.cookies.auth === undefined ){console.log("Nooooo token provided and Nooo session cart");
-    console.log("nothing");
-   // salvo il sessionCart nel local storage del browser
-    //localStorage.setItem("sessionCart", JSON.stringify(sessionCart));
-    console.log("DEVI CREARE IL SESSION CART AAAA");
-    req.result = 0;
-    next();
-  }
-  else{
+   //il cookie auth esiste, allora controllo se ci sta il token
+    if(req.cookies.auth !== undefined ){
+      //controllo se il token è valido
+      if (JSON.parse(req.cookies.auth).token !== undefined &&
+        tokenBlacklist.includes(JSON.parse(req.cookies.auth).token)==false  && 
+     tokenVerification((JSON.parse(req.cookies.auth).token)=="ok") ){
+      //se il token è valido restituisco 0
+      req.result = 0; 
+      next();
+     }
+    }     
 
-    const userAuth = JSON.parse(req.cookies.auth);
+     //IL TOKEN NON è presente o non è valido , allora passiamo a controllare se il sessionCart esista
+      //se il sessionCart cookie non esiste allora lo devo creare 
+      if ( req.cookies.sessionCart === undefined) {
 
-    //token NON VALIDO OPPURE NON PRESENTE NEL COOKIE
-    if (userAuth.token === undefined ||
-       tokenBlacklist.includes(userAuth.token)==true  || 
-    tokenVerification(userAuth.token)=="error"  )
-    {
-//SE token NON VALIDO OPPURE NON PRESENTE NEL COOKIE
+  const cookieData = {
+    sessionCart: sessionCart,
+  };
 
-      //se il carrello non è presente nel cookie allora lo devo creare 
-      if ( userAuth.sessionCart === undefined) {
+   const expiresIn =365 * 24 * 60 * 60 * 1000; // 1 anno in millisecondi
+  res.cookie('sessionCart', JSON.stringify(cookieData), {
+    httpOnly: true,
+    sameSite: 'strict',
+    secure: process.env.NODE_ENV === 'production',
+    //il cookie muore dopo 1 anno 
+    expires: new Date(Date.now() + expiresIn)
+  });
         //e passo cod 2 
-        req.result = 2;
+        req.result = 1;
         next();}
-        //Se il carrello ci sta allora semplicemente cod 3
-        else{ req.result = 3; next(); }
-  }
-  
-  //NEL CASO IN CUI IL TOKEN C'è ED é VALIDO
-else{ req.result = 1;
-  next();}
 
-}
+        //Se il sessionCart cooke ci sta allora semplicemente cod 3
+        else{ req.result = 2; next(); }
+  
+
+
 } catch (error) {
   if (error instanceof jwt.JsonWebTokenError) {
     }
