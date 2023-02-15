@@ -1,4 +1,6 @@
 const jwt = require('jsonwebtoken');
+require("dotenv").config();
+
 
 /*  Il token serve come identificatore univoco per l'utente che si è autenticato correttamente. 
 Invece di interrogare il database per verificare se l'utente ha una sessione valida ad ogni richiesta,
@@ -17,16 +19,17 @@ nel payload del token, se la verifica del token riesce. In caso contrario, viene
 
 
 
-function tokenVerification(token) {
+function tokenVerification(req,authToken) {
 
     try {
 
-     jwt.verify(token, process.env.JTW_TOKEN_SIGNATURE, { complete: true });
-
+      const decoded = jwt.verify(authToken, process.env.JTW_TOKEN_SIGNATURE,);
+       req.user = decoded.user;
+     console.log("TOKEN VALIDO");
      return "ok";
 
   } catch (error) {
-    
+    console.log("VALIDAZIONE TOKEN NON ANDATA A BUON FINE");
     return "error";
   }
 
@@ -37,7 +40,7 @@ function tokenVerification(token) {
 /*
 0 --> SI TOKEN valido
 1 --> NO TOKEN NO SESSIONCART (creato)
-2 --> NO token SI SESSIONCART
+2 --> NO TOKEN SI SESSIONCART
 
 */
 
@@ -46,27 +49,33 @@ function tokenVerification(token) {
 function controlTokenAndSessionCart(tokenBlacklist) {
   return (req, res, next) => {
     try {
-      var sessionCart = [];
+      var sessionCart = [1,1];
 
    //il cookie auth esiste, allora controllo se ci sta il token
     if(req.cookies.auth !== undefined ){
+    
       //controllo se il token è valido
-      if (JSON.parse(req.cookies.auth).token !== undefined &&
-        tokenBlacklist.includes(JSON.parse(req.cookies.auth).token)==false  && 
-     tokenVerification((JSON.parse(req.cookies.auth).token)=="ok") ){
+      if (JSON.parse(req.cookies.auth).token !== undefined) {
+
+        const authToken = JSON.parse(req.cookies.auth).token;
+
+      if (tokenBlacklist.includes(authToken)==false  && 
+      (tokenVerification(req,authToken)).localeCompare("ok") == 0  ){
       //se il token è valido restituisco 0
       req.result = 0; 
       next();
      }
-    }     
+     else console.log("TOKEN NON VALIDO");
+    }
+     else console.log("COOKIE PRESENTE MA TOKEN NO");
+    }
+    else console.log("COOKIE NON PRESENTE");    
 
      //IL TOKEN NON è presente o non è valido , allora passiamo a controllare se il sessionCart esista
       //se il sessionCart cookie non esiste allora lo devo creare 
       if ( req.cookies.sessionCart === undefined) {
 
-  const cookieData = {
-    sessionCart: sessionCart,
-  };
+  const cookieData = sessionCart;
 
    const expiresIn =365 * 24 * 60 * 60 * 1000; // 1 anno in millisecondi
   res.cookie('sessionCart', JSON.stringify(cookieData), {
@@ -87,6 +96,7 @@ function controlTokenAndSessionCart(tokenBlacklist) {
 
 } catch (error) {
   if (error instanceof jwt.JsonWebTokenError) {
+    console.log("aaaaaaaaaa");
     }
 }
 

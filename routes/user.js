@@ -11,6 +11,7 @@ const {
   removeItemById,
   updateItemsCounter,
   getCartItemsByUser,
+  getCartItemsNumberByUserId,
 } = require("../controllers/cart");
 const {
   validate,
@@ -45,6 +46,8 @@ router.post("/removeItemById",removeItemById);
 router.post("/updateItemsCounter",updateItemsCounter);
 
 router.get("/getCartItemsByUser",getCartItemsByUser);
+
+router.get("/getCartItemsNumberByUserId",getCartItemsNumberByUserId);
 
 
 module.exports = router;

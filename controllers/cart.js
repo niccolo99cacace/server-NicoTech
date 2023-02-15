@@ -135,3 +135,25 @@ exports.getCartItemsByUser = async (req, res) => {
   throw new Error(error);
 }
 };
+
+
+exports.getCartItemsNumberByUserId = async (req, res) => {  
+  
+  try {
+    const userAuth = await JSON.parse(req.cookies.auth);
+    const userId = userAuth.userId;
+
+    const user = await User.findById(userId);
+    if (!user) throw new Error('User not found');
+
+    var count = 0;
+
+    user.cart.forEach((cartItem) => {
+      count++;
+    });
+    res.json(count);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
