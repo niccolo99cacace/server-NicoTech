@@ -8,10 +8,12 @@ const {
 } = require("../controllers/user");
 const {
   addItemById,
+  addItemSessionCart ,
   removeItemById,
   updateItemsCounter,
   getCartItemsByUser,
   getCartItemsNumberByUserId,
+  getSessionCartItemsNumber,
 } = require("../controllers/cart");
 const {
   validate,
@@ -41,6 +43,8 @@ router.get("/authenticatedOrNot",controlTokenAndSessionCart(tokenBlacklist),auth
 
 router.post("/addItemById",addItemById);
 
+router.post("/addItemSessionCart",addItemSessionCart);
+
 router.post("/removeItemById",removeItemById);
 
 router.post("/updateItemsCounter",updateItemsCounter);
@@ -49,5 +53,6 @@ router.get("/getCartItemsByUser",getCartItemsByUser);
 
 router.get("/getCartItemsNumberByUserId",getCartItemsNumberByUserId);
 
+router.get("/getSessionCartItemsNumber",getSessionCartItemsNumber);
 
 module.exports = router;

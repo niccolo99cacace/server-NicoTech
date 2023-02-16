@@ -49,7 +49,7 @@ function tokenVerification(req,authToken) {
 function controlTokenAndSessionCart(tokenBlacklist) {
   return (req, res, next) => {
     try {
-      var sessionCart = [1,1];
+      const sessionCart = [];
 
    //il cookie auth esiste, allora controllo se ci sta il token
     if(req.cookies.auth !== undefined ){
@@ -95,9 +95,7 @@ function controlTokenAndSessionCart(tokenBlacklist) {
 
 
 } catch (error) {
-  if (error instanceof jwt.JsonWebTokenError) {
-    console.log("aaaaaaaaaa");
-    }
+    console.log(error);
 }
 
 }};
