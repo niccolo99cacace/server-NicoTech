@@ -12,6 +12,7 @@ const {
   removeItemById,
   updateItemsCounter,
   getCartItemsByUser,
+  getCartItemsBySessionCart,
   getCartItemsNumberByUserId,
   getSessionCartItemsNumber,
 } = require("../controllers/cart");
@@ -50,6 +51,8 @@ router.post("/removeItemById",removeItemById);
 router.post("/updateItemsCounter",updateItemsCounter);
 
 router.get("/getCartItemsByUser",getCartItemsByUser);
+
+router.get("/getCartItemsBySessionCart",getCartItemsBySessionCart);
 
 router.get("/getCartItemsNumberByUserId",getCartItemsNumberByUserId);
 

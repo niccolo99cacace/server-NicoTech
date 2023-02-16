@@ -1,4 +1,5 @@
 const User = require("../models/user");
+const Item = require("../models/item");
 
 exports.addItemById = async (req, res) => {
   try {
@@ -87,17 +88,6 @@ exports.addItemSessionCart = async (req, res) => {
   }
 };
 
-//ritorna il carrello in base allo specifico utente
-exports.getCartByUserId = async (req, res) => {
-  try {
-    const { userId } = req.body;
-
-    const user = await User.findOne({ _id: userId }, "cart");
-    res.json(user.cart);
-  } catch (error) {
-    throw new Error(error);
-  }
-};
 
 //per eliminare l'item dal carrello
 exports.removeItemById = async (req, res) => {
@@ -164,6 +154,38 @@ exports.getCartItemsByUser = async (req, res) => {
     throw new Error(error);
   }
 };
+
+exports.getCartItemsBySessionCart = async (req, res) => {
+
+  try {
+// ottieni l'array degli oggetti dal cookie
+const sessionCart = JSON.parse(req.cookies.sessionCart);
+
+// crea un array vuoto per contenere i dati dei prodotti
+const cartProducts = [];
+
+    // scansiona l'array degli oggetti nel cookie con un ciclo for
+    for (let cartItem of sessionCart) {
+      // recupera i dati del prodotto dal database
+      const product = await Item.findById(cartItem.itemId);
+
+      // crea un nuovo oggetto con i dati del prodotto e la quantità dall'array del cookie
+      const cartProduct = {
+        itemId: product,
+        itemQuantity: cartItem.itemQuantity,
+      };
+      
+      // aggiungi il nuovo oggetto all'array dei prodotti del carrello
+      cartProducts.push(cartProduct);
+    }
+
+    res.json(cartProducts); 
+  
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
 exports.getCartItemsNumberByUserId = async (req, res) => {
   try {
