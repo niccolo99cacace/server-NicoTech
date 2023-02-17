@@ -112,6 +112,25 @@ exports.removeItemById = async (req, res) => {
   }
 };
 
+//per eliminare l'item dal carrello
+exports.removeItemBySessionCart = async (req, res) => {
+  try {
+    const { itemId } = req.body;
+
+    const sessionCart = JSON.parse(req.cookies.sessionCart);
+
+      // Cerchiamo l'oggetto nell'array con la proprietà di valore specificato e lo eliminiamo
+  const filteredArray = sessionCart.filter((obj) => obj.itemId !== itemId);
+  console.log(filteredArray);
+
+  // Aggiorniamo il cookie con il nuovo array
+  res.cookie("sessionCart", JSON.stringify(filteredArray), { httpOnly: true }).json({ message: "Item eliminato correttamente" });
+
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
 //quando sto nel carrello posso decidere di modificare la quantità di item da prendere
 exports.updateItemsCounter = async (req, res) => {
   try {
@@ -135,6 +154,7 @@ exports.updateItemsCounter = async (req, res) => {
     throw new Error(error);
   }
 };
+
 
 //dato l'id dell'utente, ti restituisce un array con oggetti con chiave "ItemId" contenenti un altro oggetto
 //con tutti gli attributi dello specifico item e poi , nel primo oggetto "itemQuantity" e l'id dello specifico oggetto

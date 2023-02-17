@@ -5,11 +5,13 @@ const {
   signIn,
   logout,
   authenticatedOrNot,
+  getUserInformations,
 } = require("../controllers/user");
 const {
   addItemById,
   addItemSessionCart ,
   removeItemById,
+  removeItemBySessionCart,
   updateItemsCounter,
   getCartItemsByUser,
   getCartItemsBySessionCart,
@@ -39,6 +41,8 @@ router.get("/logout",logout);
 
 router.get("/authenticatedOrNot",controlTokenAndSessionCart(tokenBlacklist),authenticatedOrNot)
 
+router.get("/getUserInformations",getUserInformations)
+
 //_-------------------------------------------
 //      USER CART 
 
@@ -47,6 +51,8 @@ router.post("/addItemById",addItemById);
 router.post("/addItemSessionCart",addItemSessionCart);
 
 router.post("/removeItemById",removeItemById);
+
+router.post("/removeItemBySessionCart",removeItemBySessionCart);
 
 router.post("/updateItemsCounter",updateItemsCounter);
 

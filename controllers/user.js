@@ -80,12 +80,15 @@ exports.signIn = async (req, res, next) => {
 
 
 
-//distruggo la sessione sul database ed aggiungo il token dell'utente che ha fatto il logout nella blacklist
-  exports.logout = (req, res) => {
+//distruggo la sessione sul database, il cookie e poi aggiungo il token dell'utente che ha fatto il logout nella blacklist
+  exports.logout = async (req, res) => {
     try{
     const userAuth = JSON.parse(req.cookies.auth);
-    req.session.destroy();
+     req.session.destroy();
       console.log({ ok:"database session broken"});  
+      // Elimina il cookie "myCookie"
+     res.clearCookie("auth");
+      console.log("auth cookie destroyed"); 
       tokenBlacklist.push(userAuth.token);
       console.log({ ok:"token added to blacklist"}); 
       res.json({ok:"token added to blacklist"});
@@ -102,6 +105,21 @@ exports.signIn = async (req, res, next) => {
       console.log(req.result);
       
       res.json(req.result);
+    }
+    catch (error) {
+      res.json({error:error});
+    }
+  };
+
+  exports.getUserInformations = async (req, res) => {
+    try{
+      const userAuth = await JSON.parse(req.cookies.auth);
+      const userId = userAuth.userId;
+  
+      const user = await User.findById(userId);
+      if (!user) throw new Error("User not found");
+
+      res.json(user);
     }
     catch (error) {
       res.json({error:error});
