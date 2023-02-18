@@ -6,6 +6,8 @@ const {
   logout,
   authenticatedOrNot,
   getUserInformations,
+  sendResetPasswordMailAndToken,
+  LinkResetPassword,
 } = require("../controllers/user");
 const {
   addItemById,
@@ -39,9 +41,13 @@ signInValidator, validate,  signIn);
 
 router.get("/logout",logout);
 
-router.get("/authenticatedOrNot",controlTokenAndSessionCart(tokenBlacklist),authenticatedOrNot)
+router.get("/authenticatedOrNot",controlTokenAndSessionCart(tokenBlacklist),authenticatedOrNot);
 
-router.get("/getUserInformations",getUserInformations)
+router.get("/getUserInformations",getUserInformations);
+
+router.post("/sendResetPasswordMailAndToken",sendResetPasswordMailAndToken); 
+
+router.get("/LinkResetPassword/:token",LinkResetPassword);
 
 //_-------------------------------------------
 //      USER CART 

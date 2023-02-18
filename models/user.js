@@ -36,6 +36,9 @@ const userSchema = mongoose.Schema({
   cart: {
     type:[cartItemSchema],
     default:[],
+  },
+  resetPasswordToken:{
+    type:"String",
   }
 
 });

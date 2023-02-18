@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const { sendError } = require("../utils/helper");
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
 
 //la blacklist contenente i token non più validi , ovvero quelli delle persone che hanno fatto il logout
 const tokenBlacklist = [];
@@ -126,9 +127,145 @@ exports.signIn = async (req, res, next) => {
     }
   };
 
+
+
+
+// Configura il modulo nodemailer per inviare email
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: 'niccolo99cacace@gmail.com', // Inserisci il tuo indirizzo email
+    pass: 'pqluclhysbdukrsd' // Inserisci la tua password
+  }
+});
   
 
-  
+
+exports.sendResetPasswordMailAndToken = async (req, res) => {
+ 
+  try{
+    const { email, userId } = req.body;
+    console.log(email);
+    console.log(userId);
+  // Cerca l'utente nel database utilizzando l'email fornita nella richiesta
+  //viene restituito uno user o err nella funzione di callback
+   User.findOne({ email: email }, (err, user) => {
+    //Questa condizione controlla se la variabile err esiste oppure se la variabile user è null o undefined.
+    if (err || !user) {
+      // Se l'utente non è stato trovato, invia una risposta con errore
+      console.log("Utente non trovato")
+      return res.status(400).json({ message: 'Utente non trovato.' });
+    } else {
+      // Genera un token di reset password utilizzando json web token
+      const token = jwt.sign({ _id: userId }, process.env.JTW_TOKEN_SIGNATURE, { expiresIn: '15m' });
+
+      // Aggiorna il campo resetPasswordToken del documento utente con il token appena generato
+      //viene restituito uno user o err nella funzione di callback
+      User.findOneAndUpdate({ email: email }, { resetPasswordToken: token }, { new: true }, (err, user) => {
+        if (err) {
+          console.log("Errore nella memorizzazione del resetPasswordToken nel database")
+      return res.status(400).json({ message: 'Errore nella memorizzazione del resetPasswordToken nel database' });
+        } else {
+          // Invia un'email all'utente con il link per resettare la password
+          const mailOptions = {
+            from: 'niccolo99cacace@gmail.com', // Inserisci il tuo indirizzo email
+            to: email,
+            subject: 'Reset Password',
+            html: `<p>Ciao ,</p><p>Per resettare la tua password, clicca sul seguente link:</p>http://localhost:8000/api/user/LinkResetPassword/${token}<p></p><p>Il link scadrà in 15 minuti.</p>`
+          };
+          transporter.sendMail(mailOptions, (err, info) => {
+            if (err) {
+              console.log("c'è stato un errore durante l'invio dell'email");
+              console.log(err);
+              return res.status(400).json({ message: "c'è stato un errore durante l'invio dell'email" });
+            } else {
+              // Invia una risposta al client confermando l'invio dell'email
+              res.status(200).json({ message: 'Un link per il reset della password è stato inviato alla tua email.' });
+            }
+          });
+        }
+
+      });
+    }
+  });
+}
+catch (error) {
+  res.json({error:error});
+}
+};
 
 
-      
+//${process.env.CLIENT_URL}/reset-password/${token}
+
+
+/* questo metodo viene avviato quando l'utente preme sul link che gli abbiamo inviato per resettare la password . 
+Controlliamo che il resetPasswordToken che ci ha inviato tramite url sia corretto , se corretto lo rendirizziamo 
+alla pagina che gli permetterà di resettare la password.
+(noi ,nel momento in cui si deve modificare la password nel database, troviamo l'utente nel database solo
+ grazie al token in questo passaggio)
+(dopo , all'avvio della nuova password verrà , ocn un altro metodo, fatto un altro controllo del resetPasswordToken)  */ 
+exports.LinkResetPassword = async (req, res) => {
+ 
+  try{
+    const token = req.params.token;
+    console.log(token);
+// Decodifica il token di reset password utilizzando json web token
+jwt.verify(token , process.env.JTW_TOKEN_SIGNATURE, (err, decodedToken) => {
+  if (err) {
+    // Se il token non è valido, errore
+    console.log("TOKEN RESET PASSWORD NON VALIDO");
+              return res.status(400).json({ message: "TOKEN RESET PASSWORD NON VALIDO" });
+  } else {
+    // Cerca l'utente nel database utilizzando l'ID contenuto nel token
+    User.findById(decodedToken._id, (err, user) => {
+      if (err || !user) {
+        // Se l'utente non è stato trovato, reindirizza l'utente a una pagina di errore
+        console.log("UTENTE NON TROVATO CON IL RESET TOKEN USATO");
+              return res.status(400).json({ message: "UTENTE NON TROVATO CON IL RESET TOKEN USATO" });
+      } else {
+        // Mostra un modulo all'utente per la modifica della password
+        res.redirect("http://localhost:3000/reset-password/${token}");
+      }
+    });
+  }
+}
+)
+  }
+catch (error) {
+  res.json({error:error});
+}
+};
+
+
+
+/*
+
+router.post('/reset-password/:token', (req, res) => {
+  // Decodifica il token di reset password utilizzando json web token
+  jwt.verify(req.params.token, process.env.JWT_RESET_PASSWORD_SECRET, (err, decodedToken) => {
+    if (err) {
+      // Se il token non è valido, reindirizza l'utente a una pagina di errore
+      res.redirect('/error');
+    } else {
+      // Cerca l'utente nel database utilizzando l'ID contenuto nel token
+      User.findById(decodedToken._id, (err, user) => {
+        if (err || !user) {
+          // Se l'utente non è stato trovato, reindirizza l'utente a una pagina di errore
+          res.redirect('/error');
+        } else {
+          // Controlla se la nuova password è valida
+          if (req.body.password === '') {
+            // Se la password non è stata fornita, mostra un messaggio di errore all'utente
+            res.render('reset-password', { token: req.params.token, message: 'Inserisci una nuova password.' });
+          } else {
+            // Aggiorna la password dell'utente nel database e azzeri il campo resetToken
+            user.password = req.body.password;
+            user.resetToken = '';
+            user.save((err, updatedUser) => {
+              if (err) {
+                // Gestisci l'errore
+              } else {
+                // Mostra una pagina di conferma all'utente
+                res.render('
+
+                */
