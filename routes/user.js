@@ -8,6 +8,7 @@ const {
   getUserInformations,
   sendResetPasswordMailAndToken,
   LinkResetPassword,
+  ConfirmResetPassword,
 } = require("../controllers/user");
 const {
   addItemById,
@@ -48,6 +49,8 @@ router.get("/getUserInformations",getUserInformations);
 router.post("/sendResetPasswordMailAndToken",sendResetPasswordMailAndToken); 
 
 router.get("/LinkResetPassword/:token",LinkResetPassword);
+
+router.post("/ConfirmResetPassword",ConfirmResetPassword); 
 
 //_-------------------------------------------
 //      USER CART 

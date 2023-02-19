@@ -74,6 +74,7 @@ exports.signIn = async (req, res, next) => {
 
   res.json({token:token , user:_id});
 } catch (error) {
+  console.log(error);
   res.json({error:error});
 }
 };
@@ -95,6 +96,7 @@ exports.signIn = async (req, res, next) => {
       res.json({ok:"token added to blacklist"});
     }
     catch (error) {
+       console.log(error);
       res.json({error:error});
     }
   };
@@ -123,6 +125,7 @@ exports.signIn = async (req, res, next) => {
       res.json(user);
     }
     catch (error) {
+       console.log(error);
       res.json({error:error});
     }
   };
@@ -157,6 +160,7 @@ exports.sendResetPasswordMailAndToken = async (req, res) => {
       return res.status(400).json({ message: 'Utente non trovato.' });
     } else {
       // Genera un token di reset password utilizzando json web token
+      //GENERO QUESTO TOKEN METTENDOCI DENTRO L'ID DELL'UTENTE 
       const token = jwt.sign({ _id: userId }, process.env.JTW_TOKEN_SIGNATURE, { expiresIn: '15m' });
 
       // Aggiorna il campo resetPasswordToken del documento utente con il token appena generato
@@ -190,6 +194,7 @@ exports.sendResetPasswordMailAndToken = async (req, res) => {
   });
 }
 catch (error) {
+   console.log(error);
   res.json({error:error});
 }
 };
@@ -201,12 +206,13 @@ catch (error) {
 /* questo metodo viene avviato quando l'utente preme sul link che gli abbiamo inviato per resettare la password . 
 Controlliamo che il resetPasswordToken che ci ha inviato tramite url sia corretto , se corretto lo rendirizziamo 
 alla pagina che gli permetterà di resettare la password.
-(noi ,nel momento in cui si deve modificare la password nel database, troviamo l'utente nel database solo
- grazie al token in questo passaggio)
+(IL TOKEN CONTIENE L'id dell'utente , quindi io trovo l'utente nel database solo grazie al token)
 (dopo , all'avvio della nuova password verrà , ocn un altro metodo, fatto un altro controllo del resetPasswordToken)  */ 
 exports.LinkResetPassword = async (req, res) => {
  
   try{
+
+    
     const token = req.params.token;
     console.log(token);
 // Decodifica il token di reset password utilizzando json web token
@@ -216,7 +222,8 @@ jwt.verify(token , process.env.JTW_TOKEN_SIGNATURE, (err, decodedToken) => {
     console.log("TOKEN RESET PASSWORD NON VALIDO");
               return res.status(400).json({ message: "TOKEN RESET PASSWORD NON VALIDO" });
   } else {
-    // Cerca l'utente nel database utilizzando l'ID contenuto nel token
+    // Cerca l'utente nel database utilizzando l'ID contenuto nel token 
+    //il token contiene l'id dell'utente
     User.findById(decodedToken._id, (err, user) => {
       if (err || !user) {
         // Se l'utente non è stato trovato, reindirizza l'utente a una pagina di errore
@@ -224,7 +231,7 @@ jwt.verify(token , process.env.JTW_TOKEN_SIGNATURE, (err, decodedToken) => {
               return res.status(400).json({ message: "UTENTE NON TROVATO CON IL RESET TOKEN USATO" });
       } else {
         // Mostra un modulo all'utente per la modifica della password
-        res.redirect("http://localhost:3000/reset-password/${token}");
+        res.redirect(`http://localhost:3000/reset-password/${token}`);
       }
     });
   }
@@ -232,40 +239,64 @@ jwt.verify(token , process.env.JTW_TOKEN_SIGNATURE, (err, decodedToken) => {
 )
   }
 catch (error) {
+  console.log(error);
   res.json({error:error});
 }
 };
 
 
 
-/*
 
-router.post('/reset-password/:token', (req, res) => {
+
+exports.ConfirmResetPassword = async (req, res) => {
+ 
+  try{
+     
+    const { newPassword, token } = req.body;
+
   // Decodifica il token di reset password utilizzando json web token
-  jwt.verify(req.params.token, process.env.JWT_RESET_PASSWORD_SECRET, (err, decodedToken) => {
+  jwt.verify(token, process.env.JTW_TOKEN_SIGNATURE, (err, decodedToken) => {
     if (err) {
-      // Se il token non è valido, reindirizza l'utente a una pagina di errore
-      res.redirect('/error');
+      // Se il token non è valido
+      console.log("RESET PASSWORD TOKEN USATO NON VALIDO");
+      return res.status(400).json({ message: "RESET PASSWORD TOKEN USATO NON VALIDO" });
     } else {
       // Cerca l'utente nel database utilizzando l'ID contenuto nel token
       User.findById(decodedToken._id, (err, user) => {
         if (err || !user) {
           // Se l'utente non è stato trovato, reindirizza l'utente a una pagina di errore
-          res.redirect('/error');
+          console.log("L'UTENTE CERCATO IN BASE AL RESET PASSWORD TOKEN NON è STATO TROVATO");
+      return res.status(400).json({ message: "L'UTENTE CERCATO IN BASE AL RESET PASSWORD TOKEN NON è STATO TROVATO" });
         } else {
           // Controlla se la nuova password è valida
-          if (req.body.password === '') {
+          if (newPassword.newPassword === '') {
             // Se la password non è stata fornita, mostra un messaggio di errore all'utente
-            res.render('reset-password', { token: req.params.token, message: 'Inserisci una nuova password.' });
+            console.log("IL CAMPO NEWPASSWORD é VUOTO");
+            return res.status(400).json({ message: "IL CAMPO NEWPASSWORD é VUOTO" });
           } else {
             // Aggiorna la password dell'utente nel database e azzeri il campo resetToken
-            user.password = req.body.password;
-            user.resetToken = '';
+            user.password = newPassword.newPassword;
+            user.resetPasswordToken = '';
             user.save((err, updatedUser) => {
               if (err) {
                 // Gestisci l'errore
+                console.log("ERRORE DURANTE IL CARICAMENTO DELLA NUOVA PASSWORD NEL DATABASE");
+                console.log(err);
+                return res.status(400).json({ message: "ERRORE DURANTE IL CARICAMENTO DELLA NUOVA PASSWORD NEL DATABASE" });
               } else {
-                // Mostra una pagina di conferma all'utente
-                res.render('
-
-                */
+                // tutto corretto e torno al login 
+                res.redirect("http://localhost:3000/login");
+              }
+            });
+          }
+        }
+      })
+          }
+        })
+      }
+        catch (error) {
+           console.log(error);
+          res.json({error:error});
+        }
+        };
+                
