@@ -29,6 +29,7 @@ const router = express.Router();
 const controlTokenAndSessionCart= require("../middlewares/is-auth");
 
 
+
 // USER
 
 router.post("/createUser", 
@@ -50,7 +51,7 @@ router.post("/sendResetPasswordMailAndToken",sendResetPasswordMailAndToken);
 
 router.get("/LinkResetPassword/:token",LinkResetPassword);
 
-router.post("/ConfirmResetPassword",ConfirmResetPassword); 
+router.post("/ConfirmResetPassword", ConfirmResetPassword); 
 
 //_-------------------------------------------
 //      USER CART 

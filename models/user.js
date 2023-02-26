@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
+
 //l'utente contiene il campo "cart" , un array di elementi cartItemSchema , ovvero l'id dell'item e la quantità
 
 
@@ -33,12 +34,18 @@ const userSchema = mongoose.Schema({
     type: String,
     required: true,
   },
+  //grazie all'attributo "default" , anche se ad esempio creo l'utente solo tramite nome, email e password 
+  //verrà creato lo stesso un attributo cart con valore []
   cart: {
     type:[cartItemSchema],
     default:[],
   },
   resetPasswordToken:{
     type:"String",
+  },
+  confirmedAccount:{
+    type:Boolean,
+    default:false,
   }
 
 });

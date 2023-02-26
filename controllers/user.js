@@ -33,6 +33,9 @@ exports.signIn = async (req, res, next) => {
   const user = await User.findOne({ email });
   if (!user) return sendError(res, "Email/Password mismatch!");
 
+  //nel caso in cui l'email dell'utente non sia stata ancora confermata
+  if (user.confirmedAccount == false) return sendError(res, "Email still not confirmed");
+
   const matched = await user.comparePassword(password);
   if (!matched) return sendError(res, "Email/Password mismatch!");
 
@@ -147,9 +150,10 @@ const transporter = nodemailer.createTransport({
 exports.sendResetPasswordMailAndToken = async (req, res) => {
  
   try{
-    const { email, userId } = req.body;
+    const { email } = req.body;
     console.log(email);
-    console.log(userId);
+  
+
   // Cerca l'utente nel database utilizzando l'email fornita nella richiesta
   //viene restituito uno user o err nella funzione di callback
    User.findOne({ email: email }, (err, user) => {
@@ -157,8 +161,9 @@ exports.sendResetPasswordMailAndToken = async (req, res) => {
     if (err || !user) {
       // Se l'utente non è stato trovato, invia una risposta con errore
       console.log("Utente non trovato")
-      return res.status(400).json({ message: 'Utente non trovato.' });
+      return res.status(400).json({ message: 'There is no user matching this email.' });
     } else {
+      var userId = user._id.toString();;
       // Genera un token di reset password utilizzando json web token
       //GENERO QUESTO TOKEN METTENDOCI DENTRO L'ID DELL'UTENTE 
       const token = jwt.sign({ _id: userId }, process.env.JTW_TOKEN_SIGNATURE, { expiresIn: '15m' });
@@ -168,7 +173,7 @@ exports.sendResetPasswordMailAndToken = async (req, res) => {
       User.findOneAndUpdate({ email: email }, { resetPasswordToken: token }, { new: true }, (err, user) => {
         if (err) {
           console.log("Errore nella memorizzazione del resetPasswordToken nel database")
-      return res.status(400).json({ message: 'Errore nella memorizzazione del resetPasswordToken nel database' });
+      return res.status(400).json({ message: 'Error storing resetPasswordToken in database' });
         } else {
           // Invia un'email all'utente con il link per resettare la password
           const mailOptions = {
@@ -181,10 +186,10 @@ exports.sendResetPasswordMailAndToken = async (req, res) => {
             if (err) {
               console.log("c'è stato un errore durante l'invio dell'email");
               console.log(err);
-              return res.status(400).json({ message: "c'è stato un errore durante l'invio dell'email" });
+              return res.status(400).json({ message: "there was an error while sending the email" });
             } else {
               // Invia una risposta al client confermando l'invio dell'email
-              res.status(200).json({ message: 'Un link per il reset della password è stato inviato alla tua email.' });
+              res.status(200).json({ ok: 'A password reset link has been sent to your email.' });
             }
           });
         }
@@ -285,7 +290,8 @@ exports.ConfirmResetPassword = async (req, res) => {
                 return res.status(400).json({ message: "ERRORE DURANTE IL CARICAMENTO DELLA NUOVA PASSWORD NEL DATABASE" });
               } else {
                 // tutto corretto e torno al login 
-                res.redirect("http://localhost:3000/login");
+                console.log("password modificata con successo");
+                return res.status(200).json({ ok: "PASSWORD SUCCESSFULLY CHANGED" });
               }
             });
           }
@@ -296,6 +302,7 @@ exports.ConfirmResetPassword = async (req, res) => {
       }
         catch (error) {
            console.log(error);
+           console.log("ERRORRR")
           res.json({error:error});
         }
         };

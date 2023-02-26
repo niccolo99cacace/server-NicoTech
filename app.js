@@ -8,6 +8,7 @@ require("dotenv").config();
 require("./db");
 const userRouter = require("./routes/user");
 const itemRouter = require("./routes/item");
+const cors = require('cors'); 
 
 
 const app = express();
@@ -20,13 +21,13 @@ const cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
 
-const cors = require('cors');
 
 
 app.use(cors({
   origin: 'http://localhost:3000',
   credentials: true
-}));
+})); 
+
 
 
 
