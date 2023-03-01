@@ -54,7 +54,6 @@ exports.getItemById = async (req, res) => {
 //la query fatta dal motore di ricerca 
 exports.getSearchResults = async (req, res) => {
 const {query}  = req.body;
-console.log(query);
 
 try {
 
@@ -86,7 +85,7 @@ try {
 //Alla fine questa funzione è uguale a quella della ricerca normale , solo che questa restituisce solo 10 items max
 exports.getSuggestions = async (req, res) => {
   const {query}  = req.body;
-  console.log(query);
+
   try {
     const results = await Item.find({
       $or: [
@@ -99,8 +98,56 @@ exports.getSuggestions = async (req, res) => {
     //specifica i campi da includere o escludere nel risultato. In questo caso, vengono inclusi solo 
     //i campi "name", "brand" e "category", mentre viene escluso il campo "_id" 
     //(ADESSO NON LO USIAMO)
+
     //.select("name brand category -_id");
     res.json(results);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal server error' });
+  };
+};
+
+
+//restituiamo gli item considerando i filtri applicati 
+//NOTA che si considerano tutti i casi , ovvero anche quando alcuni filtri sono imposti ed altri no
+exports.getFilteredItems = async (req, res) => {
+
+  const {categories, brands, minPrice, maxPrice}  = req.body;
+  console.log(categories);
+  console.log(brands);
+  console.log(minPrice);
+  console.log(maxPrice);
+  try {
+    let query = {};
+
+    if (categories!==undefined && categories.length>0) {
+      console.log("aaa");
+      query.category = { $in: categories };
+    }
+
+    if (brands!==undefined && brands.length>0){
+      console.log("bbbb");
+      query.brand = { $in: brands };
+    }
+
+    if (minPrice!==undefined || maxPrice!==undefined) {
+      console.log("ccc");
+      query.price = {};
+
+      if (minPrice!==undefined) {
+        console.log("dddd");
+        query.price.$gte = minPrice;
+      }
+
+      if (maxPrice!==undefined) {
+        console.log("eee");
+        query.price.$lte = maxPrice;
+      }
+    }
+
+    const items = await Item.find(query);
+console.log(items);
+    res.json(items);
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: 'Internal server error' });
