@@ -4,6 +4,8 @@ const {
     home,
     createItem,
     getItemById,
+    getSearchResults,
+    getSuggestions,
   } = require("../controllers/item"); 
 
   const {
@@ -16,6 +18,8 @@ router.post("/createItem", createItem);
 
 router.post("/getItemById",getItemById);
 
+router.post("/getSearchResults",getSearchResults);
 
+router.post("/getSuggestions",getSuggestions);
 
 module.exports = router;

@@ -48,3 +48,61 @@ exports.getItemById = async (req, res) => {
       res.json({error:error });
   }); 
 };
+
+
+
+//la query fatta dal motore di ricerca 
+exports.getSearchResults = async (req, res) => {
+const {query}  = req.body;
+console.log(query);
+
+try {
+
+  //stiamo cercando tutti gli item con nome parzialmente corrispondente alla query (ovvero ciò che è stato inserito dall'utente)
+  //$regex fa in modo che se parte di quello inserito nella query sta nel titolo allora la corrispondenza vale
+  //ad esempio se query="book" e title="the life book" la corrispondenza è valida o anche se cerco semplicemente "6" ,
+  //mi verrà restituito ogni item con il numero 6 nel titolo
+  //$options è un attributo opzionale e con 'i' diciamo che la corrispondenza è case INsensitive
+  //infine con toArray() restituiamo i risultati raccolti in un array
+  //grazie all'operatore $or , oltre al titolo dell'item, vengono controllate anche le corrispondenze con il brand
+  //e con la categoria
+  const results = await Item.find({
+    $or: [
+      { name: { $regex: query, $options: 'i' } },
+      { brand: { $regex: query, $options: 'i' } },
+      { category: { $regex: query, $options: 'i' } }
+    ]
+  });
+  res.json(results);
+} catch (error) {
+  console.log(error);
+  res.status(500).json({ message: 'Internal server error' });
+};
+};
+
+//per i suggerimenti AJAX , dato il contenuto della barra di ricera 
+//con suggerimenti si intende il caricamento automatico dei primi 10 item che matchano con il contenuto 
+//della barra di ricerca 
+//Alla fine questa funzione è uguale a quella della ricerca normale , solo che questa restituisce solo 10 items max
+exports.getSuggestions = async (req, res) => {
+  const {query}  = req.body;
+  console.log(query);
+  try {
+    const results = await Item.find({
+      $or: [
+        { name: { $regex: query, $options: 'i' } },
+        { brand: { $regex: query, $options: 'i' } },
+        { category: { $regex: query, $options: 'i' } }
+      ]
+    })
+    .limit(10)
+    //specifica i campi da includere o escludere nel risultato. In questo caso, vengono inclusi solo 
+    //i campi "name", "brand" e "category", mentre viene escluso il campo "_id" 
+    //(ADESSO NON LO USIAMO)
+    //.select("name brand category -_id");
+    res.json(results);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: 'Internal server error' });
+  };
+};
