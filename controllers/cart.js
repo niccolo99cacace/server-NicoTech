@@ -167,6 +167,7 @@ exports.getCartItemsByUser = async (req, res) => {
     const user = await User.findById(userId);
     if (!user) throw new Error("User not found");
 
+    //riempiamo il campo cart di User con l'array di elementi Item referenziati in cart
     const cartItems = await user.populate("cart.itemId");
 
     res.json(cartItems.cart);

@@ -1,5 +1,12 @@
 const mongoose = require("mongoose");
 
+const reviewItemSchema = new mongoose.Schema({
+  reviewId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Review',
+  },
+});
+
 const itemSchema = mongoose.Schema({
   name: {
     type: String,
@@ -42,6 +49,10 @@ availability:{
     type: [String],
     trim: true,
     required: true
+  },
+  reviews: {
+    type:[reviewItemSchema],
+    default:[],
   },
 
 });

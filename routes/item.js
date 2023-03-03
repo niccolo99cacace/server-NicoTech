@@ -7,6 +7,8 @@ const {
     getSearchResults,
     getSuggestions,
     getFilteredItems ,
+    createReview,
+    getReviewsByItem,
   } = require("../controllers/item"); 
 
   const {
@@ -24,5 +26,9 @@ router.post("/getSearchResults",getSearchResults);
 router.post("/getSuggestions",getSuggestions);
  
 router.post("/getFilteredItems",getFilteredItems);
+
+router.post("/createReview",createReview);
+
+router.post("/getReviewsByItem",getReviewsByItem);
 
 module.exports = router;
