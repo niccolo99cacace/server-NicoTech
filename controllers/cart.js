@@ -1,5 +1,7 @@
 const User = require("../models/user");
 const Item = require("../models/item");
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 exports.addItemById = async (req, res) => {
   try {
@@ -96,15 +98,19 @@ exports.removeItemById = async (req, res) => {
 
     const userAuth = await JSON.parse(req.cookies.auth);
     const userId = userAuth.userId;
-    console.log(userId);
-    const user = await User.findById(userId);
+    //converto in ObjectId (solitamente viene fatto in automatico)
+    const userIdObject = new ObjectId(userId);
+    console.log(userIdObject);
+    const user = await User.findById(userIdObject);
     if (!user) throw new Error("User not found");
+    console.log(user);
 
     const updatedUser = await User.findOneAndUpdate(
-      { userId },
+      { userIdObject },
       { $pull: { cart: { itemId } } },
       { new: true }
     );
+    console.log(updatedUser);
 
     res.json(updatedUser);
   } catch (error) {
@@ -235,6 +241,25 @@ exports.getSessionCartItemsNumber = async (req, res) => {
     const count = sessionCartCount.length;
 
     res.json(count);
+  } catch (error) {
+    console.log(error);
+    throw error;
+  }
+};
+
+//per pulire il carrello e renderlo vuoto
+exports.clearCart = async (req, res) => {
+  try {
+    const userAuth = await JSON.parse(req.cookies.auth);
+    const userId = userAuth.userId;
+
+    const user = await User.findById(userId);
+    if (!user) throw new Error("User not found");
+    console.log(user);
+
+    const updatedUser = await User.findByIdAndUpdate(userId, { cart: [] }, { new: true });
+console.log(updatedUser);
+    res.json(updatedUser);
   } catch (error) {
     console.log(error);
     throw error;

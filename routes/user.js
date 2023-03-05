@@ -20,6 +20,7 @@ const {
   getCartItemsBySessionCart,
   getCartItemsNumberByUserId,
   getSessionCartItemsNumber,
+  clearCart,
 } = require("../controllers/cart");
 const {
   validate,
@@ -73,5 +74,7 @@ router.get("/getCartItemsBySessionCart",getCartItemsBySessionCart);
 router.get("/getCartItemsNumberByUserId",getCartItemsNumberByUserId);
 
 router.get("/getSessionCartItemsNumber",getSessionCartItemsNumber);
+
+router.get("/clearCart",clearCart);
 
 module.exports = router;
