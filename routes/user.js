@@ -9,6 +9,7 @@ const {
   sendResetPasswordMailAndToken,
   LinkResetPassword,
   ConfirmResetPassword,
+  adminOrNot,
 } = require("../controllers/user");
 const {
   addItemById,
@@ -76,5 +77,7 @@ router.get("/getCartItemsNumberByUserId",getCartItemsNumberByUserId);
 router.get("/getSessionCartItemsNumber",getSessionCartItemsNumber);
 
 router.get("/clearCart",clearCart);
+
+router.get("/adminOrNot",adminOrNot);
 
 module.exports = router;

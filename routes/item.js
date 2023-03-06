@@ -9,6 +9,9 @@ const {
     getFilteredItems ,
     createReview,
     getReviewsByItem,
+    deleteItemById,
+    updateItemPrice,
+    updateItemAvailability,
   } = require("../controllers/item"); 
 
   const {
@@ -31,4 +34,9 @@ router.post("/createReview",createReview);
 
 router.post("/getReviewsByItem",getReviewsByItem);
 
+router.post("/deleteItemById",deleteItemById);
+
+router.post("/updateItemPrice",updateItemPrice);
+
+router.post("/updateItemAvailability",updateItemAvailability);
 module.exports = router;

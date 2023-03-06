@@ -52,9 +52,9 @@ exports.getItemById = async (req, res) => {
       } else {
         // Convert the Mongoose object to a plain JavaScript object
         const plainObject = doc.toObject();
+        console.log(plainObject);
         res.json(plainObject);
-        // Return the plain JavaScript object
-        return plainObject;
+        
       }
     })
     .catch((error) => {
@@ -123,10 +123,6 @@ exports.getSuggestions = async (req, res) => {
 //NOTA che si considerano tutti i casi , ovvero anche quando alcuni filtri sono imposti ed altri no
 exports.getFilteredItems = async (req, res) => {
   const { categories, brands, minPrice, maxPrice } = req.body;
-  console.log(categories);
-  console.log(brands);
-  console.log(minPrice);
-  console.log(maxPrice);
   try {
     let query = {};
 
@@ -203,3 +199,87 @@ console.log(itemReviews.reviews);
     throw error;
   }
 };
+
+
+exports.deleteItemById = async (req, res) => {
+  try {
+    const { itemId } = req.body;
+console.log(itemId);
+const result = await Item.deleteOne({ _id: itemId });
+// Se l'item non è stato trovato, lancia un'eccezione
+if (result.deletedCount === 0) throw new Error('Item not found'); 
+console.log(result);
+    res.json(result);
+  } catch (error) {
+    throw new Error(error);
+  }
+};
+
+
+  exports.updateItemPrice = async (req, res) => {
+  try {
+    const { itemId,newPrice } = req.body;
+
+    const item = await Item.findById(itemId);
+    if (!item) {
+      // se l'item con l'id specificato non esiste, restituisce un errore
+      throw new Error("Item non trovato"); 
+    }
+
+    item.price = newPrice; // aggiorna il prezzo dell'item
+
+    await item.save(); // salva le modifiche nel database
+
+    return item; // restituisce l'item aggiornato
+  } catch (error) {
+    console.error(error);
+    throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
+  }
+}
+
+
+exports.updateItemPrice = async (req, res) => {
+  try {
+    const { itemId,newPrice } = req.body;
+
+    const item = await Item.findById(itemId);
+    if (!item) {
+      // se l'item con l'id specificato non esiste, restituisce un errore
+      throw new Error("Item non trovato"); 
+    }
+
+    item.price = newPrice; // aggiorna il prezzo dell'item
+
+    await item.save(); // salva le modifiche nel database
+
+    return item; // restituisce l'item aggiornato
+  } catch (error) {
+    console.error(error);
+    throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
+  }
+}
+
+
+exports.updateItemAvailability = async (req, res) => {
+  try {
+    const { itemId,newAvailability } = req.body;
+
+    const item = await Item.findById(itemId);
+    if (!item) {
+      // se l'item con l'id specificato non esiste, restituisce un errore
+      throw new Error("Item non trovato"); 
+    }
+
+    item.availability = newAvailability; // aggiorna il prezzo dell'item
+
+    await item.save(); // salva le modifiche nel database
+
+    return item; // restituisce l'item aggiornato
+  } catch (error) {
+    console.error(error);
+    throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
+  }
+}
+
+
+

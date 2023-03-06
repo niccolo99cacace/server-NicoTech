@@ -46,6 +46,10 @@ const userSchema = mongoose.Schema({
   confirmedAccount:{
     type:Boolean,
     default:false,
+  },
+  admin:{
+    type:Boolean,
+    default:false,
   }
 
 });
