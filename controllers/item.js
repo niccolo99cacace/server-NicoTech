@@ -2,6 +2,11 @@ const Item = require("../models/item");
 const Review = require("../models/review");
 const { sendError } = require("../utils/helper");
 
+//import utili a configurare cloudinary per le immagini
+const cloudinary = require('cloudinary').v2;
+const multer = require('multer');
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
+
 exports.home = async (req, res, next) => {
   try {
     const items = await Item.find();
@@ -12,34 +17,7 @@ exports.home = async (req, res, next) => {
   }
 };
 
-exports.createItem = async (req, res) => {
-  const {
-    name,
-    brand,
-    description,
-    largeDescription,
-    category,
-    price,
-    availability,
-    imageUrl,
-  } = req.body;
 
-  const newItem = new Item({
-    name,
-    brand,
-    description,
-    largeDescription,
-    category,
-    price,
-    availability,
-    imageUrl,
-  });
-  await newItem.save();
-
-  res.status(201).json({
-    message: "Item added!",
-  });
-};
 
 exports.getItemById = async (req, res) => {
   const { _id } = req.body;
@@ -283,3 +261,166 @@ exports.updateItemAvailability = async (req, res) => {
 
 
 
+//---------------------------------------------------------------
+//sezione ADMIN per aggiunta Item
+
+// Configura le credenziali di autenticazione di Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configura la storage di Cloudinary per multer
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'NicoTech',
+    format: async (req, file) => 'png', // Puoi specificare il formato dell'immagine caricata
+    public_id: (req, file) => `${Date.now()}-${file.originalname}`, // Il nome pubblico dell'immagine su Cloudinary
+  },
+});
+
+// Configura il middleware multer con la storage di Cloudinary
+const upload = multer({ storage });
+
+/* 
+questa funzione è il middleware creato con multer che dobbiamo usare ogni volta per caricare l'immagine 
+con il nome (in tal caso image1) per caricare il file con nome specificato nel client quando lo inviamo 
+multer lavora in contatto con la nostra lbreria cloudinary che abbiamo configurato per caricare le immagini su cloud 
+
+
+
+    upload.single('image1')(req, res, async (err) => {
+      if (err) {
+        console.error('Error uploading image:', err);
+        res.status(400).send('Error uploading image');
+      } else {
+        // L'immagine è stata caricata su Cloudinary, restituisci l'URL pubblico dell'immagine
+        const imageUrl = req.file.path;
+        console.log('Image uploaded successfully:', imageUrl);
+        return imageUrl;
+      }
+    });
+
+
+    [in uploadImagesOnCloud ho usato questa ma per più immagini]
+    */
+
+
+
+
+exports.createItem = async (req, res) => {
+  try {
+
+  const {
+    name,
+    brand,
+    description,
+    largeDescription,
+    category,
+    price,
+    availability,
+    image1,
+    image2,
+    image3,
+  } = req.body;
+
+// Carica l'immagine su Cloudinary
+ const image1Url = await uploadImage(image1);
+ const image2Url = await uploadImage(image2);
+ const image3Url = await uploadImage(image3);
+ const imageUrl = [image1Url, image2Url, image3Url];
+
+
+  const newItem = new Item({
+    name,
+    brand,
+    description,
+    largeDescription,
+    category,
+    price,
+    availability,
+    imageUrl,
+  });
+  await newItem.save();
+
+  res.status(201).json({
+    message: "Item added!",
+  });
+
+} catch (error) {
+  console.error(error);
+  throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
+}
+};
+
+
+
+
+//per caricare le 3 immagini su cloud
+exports.uploadImage1OnCloud = async (req, res) => {
+  try{
+  upload.single('image1')(req, res, async (err) => {
+    if (err) {
+       console.error('Error uploading image:', err);
+      res.status(400).send('Error uploading image');
+    } else {
+      // L'immagine è stata caricata su Cloudinary, restituisci l'URL pubblico dell'immagine
+      const imageUrl = req.file.path;
+      console.log('Image1 uploaded successfully:', imageUrl);
+      return imageUrl;
+    }
+  });
+  res.status(201).json({
+    message: "Image added!",
+  });
+} catch (error) {
+  console.error(error);
+  throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
+}
+};
+
+exports.uploadImage2OnCloud = async (req, res) => {
+  try{
+  upload.single('image2')(req, res, async (err) => {
+    if (err) {
+       console.error('Error uploading image:', err);
+      res.status(400).send('Error uploading image');
+    } else {
+      // L'immagine è stata caricata su Cloudinary, restituisci l'URL pubblico dell'immagine
+      const imageUrl = req.file.path;
+      console.log('Image2 uploaded successfully:', imageUrl);
+      return imageUrl;
+    }
+  });;
+  res.status(201).json({
+    message: "Image added!",
+  });
+} catch (error) {
+  console.error(error);
+  throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
+}
+};
+
+exports.uploadImage3OnCloud = async (req, res) => {
+  try{
+  upload.single('image3')(req, res, async (err) => {
+    if (err) {
+       console.error('Error uploading image:', err);
+      res.status(400).send('Error uploading image');
+    } else {
+      // L'immagine è stata caricata su Cloudinary, restituisci l'URL pubblico dell'immagine
+      const imageUrl = req.file.path;
+      console.log('Image3 uploaded successfully:', imageUrl);
+      return imageUrl;
+    }
+  });
+  res.status(201).json({
+    message: "Image added!",
+  });
+} catch (error) {
+  console.error(error);
+  throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
+}
+};

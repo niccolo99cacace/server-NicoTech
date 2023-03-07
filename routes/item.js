@@ -12,6 +12,9 @@ const {
     deleteItemById,
     updateItemPrice,
     updateItemAvailability,
+    uploadImage1OnCloud,
+    uploadImage2OnCloud,
+    uploadImage3OnCloud,
   } = require("../controllers/item"); 
 
   const {
@@ -39,4 +42,13 @@ router.post("/deleteItemById",deleteItemById);
 router.post("/updateItemPrice",updateItemPrice);
 
 router.post("/updateItemAvailability",updateItemAvailability);
+
+router.post("/uploadImage1OnCloud",uploadImage1OnCloud,);
+
+router.post("/uploadImage2OnCloud",uploadImage2OnCloud,);
+
+router.post("/uploadImage3OnCloud",uploadImage3OnCloud,);
+
 module.exports = router;
+
+
