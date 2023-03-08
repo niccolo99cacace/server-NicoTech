@@ -127,8 +127,8 @@ exports.getUserInformations = async (req, res) => {
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "niccolo99cacace@gmail.com", // Inserisci il tuo indirizzo email
-    pass: "pqluclhysbdukrsd", // Inserisci la tua password
+    user: process.env.EMAIL_NAME, // Inserisci il tuo indirizzo email
+    pass: process.env.TEMPORARY_PASS, // Inserisci la tua password
   },
 });
 
