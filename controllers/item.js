@@ -321,17 +321,8 @@ exports.createItem = async (req, res) => {
     category,
     price,
     availability,
-    image1,
-    image2,
-    image3,
+    imageUrl,
   } = req.body;
-
-// Carica l'immagine su Cloudinary
- const image1Url = await uploadImage(image1);
- const image2Url = await uploadImage(image2);
- const image3Url = await uploadImage(image3);
- const imageUrl = [image1Url, image2Url, image3Url];
-
 
   const newItem = new Item({
     name,
@@ -361,25 +352,25 @@ exports.createItem = async (req, res) => {
 //per caricare le 3 immagini su cloud
 exports.uploadImage1OnCloud = async (req, res) => {
   try{
-  upload.single('image1')(req, res, async (err) => {
+    upload.single('image1')(req, res, async (err) => {
     if (err) {
        console.error('Error uploading image:', err);
       res.status(400).send('Error uploading image');
     } else {
       // L'immagine è stata caricata su Cloudinary, restituisci l'URL pubblico dell'immagine
       const imageUrl = req.file.path;
+      console.log(typeof imageUrl);
       console.log('Image1 uploaded successfully:', imageUrl);
-      return imageUrl;
+      res.status(201).send(imageUrl);
     }
   });
-  res.status(201).json({
-    message: "Image added!",
-  });
+
 } catch (error) {
   console.error(error);
   throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
 }
 };
+
 
 exports.uploadImage2OnCloud = async (req, res) => {
   try{
@@ -391,12 +382,9 @@ exports.uploadImage2OnCloud = async (req, res) => {
       // L'immagine è stata caricata su Cloudinary, restituisci l'URL pubblico dell'immagine
       const imageUrl = req.file.path;
       console.log('Image2 uploaded successfully:', imageUrl);
-      return imageUrl;
+      res.status(201).send(imageUrl);
     }
   });;
-  res.status(201).json({
-    message: "Image added!",
-  });
 } catch (error) {
   console.error(error);
   throw new Error("Errore durante l'aggiornamento del prezzo dell'item");
@@ -405,7 +393,7 @@ exports.uploadImage2OnCloud = async (req, res) => {
 
 exports.uploadImage3OnCloud = async (req, res) => {
   try{
-  upload.single('image3')(req, res, async (err) => {
+    upload.single('image3')(req, res, async (err) => {
     if (err) {
        console.error('Error uploading image:', err);
       res.status(400).send('Error uploading image');
@@ -413,11 +401,8 @@ exports.uploadImage3OnCloud = async (req, res) => {
       // L'immagine è stata caricata su Cloudinary, restituisci l'URL pubblico dell'immagine
       const imageUrl = req.file.path;
       console.log('Image3 uploaded successfully:', imageUrl);
-      return imageUrl;
+      res.status(201).send(imageUrl);
     }
-  });
-  res.status(201).json({
-    message: "Image added!",
   });
 } catch (error) {
   console.error(error);
